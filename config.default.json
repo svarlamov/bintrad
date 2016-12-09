@@ -1,0 +1,18 @@
+{
+  "apiUrl": ":3000",
+  "dbPath": "username:password@tcp(localhost:3306)/bintraddev?charset=utf8mb4&parseTime=True",
+  "dbName": "bintraddev",
+  "dbSetupSQLScript": "./create_tables.sql",
+  "geoLiteMMDBPath": "./GeoLite2-City.mmdb",
+  "home": "localhost:3000",
+  "smtpCredentials": {
+    "displayName": "BinTrad",
+    "emailAddress": "example@example.com",
+    "password": "pword",
+    "hostname": "smtp.gmail.com",
+    "port": "587",
+
+  },
+  "tokenCookieName": "sessId",
+  "mode": "debug"
+}
