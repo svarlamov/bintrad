@@ -10,8 +10,7 @@
     "emailAddress": "example@example.com",
     "password": "pword",
     "hostname": "smtp.gmail.com",
-    "port": "587",
-
+    "port": "587"
   },
   "tokenCookieName": "sessId",
   "mode": "debug"

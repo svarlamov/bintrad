@@ -59,12 +59,14 @@ CREATE TABLE IF NOT EXISTS `contract_session` (
   `period` int NOT NULL,
   `data_start` datetime,
   `data_end` datetime,
+  `final_tick_id` bigint(20) NOT NULL,
   `created_at` datetime,
   `is_closed` boolean,
   `closed_at` datetime,
   `updated_at` datetime,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES user(id),
+  FOREIGN KEY (`final_tick_id`) REFERENCES ticker_data(id),
   FOREIGN KEY (`ticker_id`) REFERENCES ticker(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 CREATE TABLE IF NOT EXISTS `contract` (

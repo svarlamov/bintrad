@@ -3,7 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/svarlamov/mailpwn-server/config"
+	"github.com/svarlamov/bintrad/config"
 	"net/http"
 	"reflect"
 )

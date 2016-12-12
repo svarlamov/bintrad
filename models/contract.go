@@ -15,3 +15,11 @@ type Contract struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
+
+func (contract *Contract) Create() error {
+	return db.Create(&contract).Error
+}
+
+func (contract *Contract) GetById() error {
+	return db.Where("id = ?", contract.Id).First(&contract).Error
+}

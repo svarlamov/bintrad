@@ -14,10 +14,12 @@ func CreateRouter() http.Handler {
 	router := mux.NewRouter()
 	router = router.StrictSlash(true)
 
+	// TODO: View routes
 	//router.HandleFunc("/r/{authPathToken}", Use(api.V0_API_Activate_Registration_Link)).Methods("GET")
 	//router.HandleFunc("/l/{sentFromEmailEncoded}/{tracePathToken}", Use(api.V0_API_Trace_Request)).Methods("GET")
 
 	// API V0 Routes
+	// TODO: Add in contracts routes, create a new 'my user data' route, and (as time allows) a leaderboard endpoint
 	apiV0Router := router.PathPrefix("/api/v0").Subrouter()
 	apiV0Router = apiV0Router.StrictSlash(true)
 	apiV0Router.HandleFunc("/", Use(api.V0_API)).Methods("GET")
@@ -26,6 +28,8 @@ func CreateRouter() http.Handler {
 
 	// Ensure that the API V0 subrouter gets called
 	router.PathPrefix("/api/v0/").Handler(apiV0Router)
+
+	// TODO: Static file routes
 
 	// Setup CSRF Protection
 	csrfHandler := nosurf.New(router)
