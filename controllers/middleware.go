@@ -70,6 +70,25 @@ func RequireValidTokenForAPI(handler http.Handler) http.HandlerFunc {
 	}
 }
 
+func RequireValidTokenForView(handler http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var respondUnauthorized = func() {
+			utils.TemporaryRedirect(w, r, "/")
+		}
+		token, err := context.GetToken(r)
+		if err != nil {
+			respondUnauthorized()
+			return
+		}
+		if !(token.IsValid()) {
+			respondUnauthorized()
+			return
+		} else {
+			handler.ServeHTTP(w, r)
+		}
+	}
+}
+
 func EnsureSecureConnection(handler http.Handler) http.HandlerFunc {
 	// Assumes header names from AWS ELB setup, and should pass silently in a dev environment due to the port checks
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -17,6 +17,17 @@ func V0_API_Start_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	completeUser := models.CompleteUser{}
+	err = completeUser.PopulateFromUser(user)
+	if err != nil {
+		utils.JSONInternalError(w, "Error creating a new contract session", "")
+		return
+	}
+	if completeUser.CurrentBalance < 0 {
+		utils.JSONBadRequestError(w, "Insufficient funds", "")
+		return
+	}
+
 	contractPeriod := 1
 	ticker := models.Ticker{}
 	tickerData, finalTickId, err := ticker.GetRandomTickerAndDataSubset(contractPeriod)
@@ -84,6 +95,18 @@ func V0_API_Finalise_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		utils.JSONDetailed(w, utils.APIResponse{Message: "Contract session has expired"}, 422)
 		return
 	}
+
+	completeUser := models.CompleteUser{}
+	err = completeUser.PopulateFromUser(user)
+	if err != nil {
+		utils.JSONInternalError(w, "Error creating a new contract session", "")
+		return
+	}
+	if completeUser.CurrentBalance < reqObj.Bet {
+		utils.JSONBadRequestError(w, "Insufficient funds", "")
+		return
+	}
+
 	contract, err := contractSession.GenerateContractData(reqObj.Bet, reqObj.IsBullish, contractSession.FinalTickId)
 	if err != nil {
 		utils.JSONInternalError(w, "Error generating contract", "")
@@ -94,7 +117,8 @@ func V0_API_Finalise_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		utils.JSONInternalError(w, "Error generating contract", "")
 		return
 	}
-	completeUser := models.CompleteUser{}
+
+	completeUser = models.CompleteUser{}
 	err = completeUser.PopulateFromUser(user)
 	if err != nil {
 		utils.JSONInternalError(w, "Error getting user data", "")

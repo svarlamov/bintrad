@@ -3,7 +3,6 @@ package views
 import (
 	"github.com/svarlamov/bintrad/config"
 	"github.com/svarlamov/bintrad/context"
-	"github.com/svarlamov/bintrad/models"
 	"github.com/svarlamov/bintrad/utils"
 	"net/http"
 )
@@ -17,13 +16,5 @@ func V0_VIEWS_Index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	completeUser := models.CompleteUser{}
-	err = completeUser.PopulateFromUser(user)
-	if err != nil {
-		utils.RenderSuccessfulTemplateFromFile(w, "templates/login.html")
-		return
-	}
-
-	utils.RenderSuccessfulTemplateFromFile(w, "templates/trading_desk.html")
-
+	utils.TemporaryRedirect(w, r, "/tradingDesk")
 }

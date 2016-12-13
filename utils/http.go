@@ -151,3 +151,7 @@ func RenderSuccessfulTemplateFromFile(w http.ResponseWriter, filePath string) {
 	loginTempl := template.Must(template.ParseFiles(filePath))
 	loginTempl.Execute(w, nil)
 }
+
+func TemporaryRedirect(w http.ResponseWriter, r *http.Request, url string) {
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}

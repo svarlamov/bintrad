@@ -25,7 +25,7 @@ func (completeUser *CompleteUser) PopulateFromUser(user User) error {
 	completeUser.StartingBalance = user.StartingBalance
 
 	var contracts []Contract
-	err := db.Where("user_id = ?", user.Id).Scan(&contracts).Error
+	err := db.Where("user_id = ?", user.Id).Find(&contracts).Error
 	if err != nil {
 		return err
 	}
