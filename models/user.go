@@ -3,19 +3,20 @@ package models
 import "time"
 
 type User struct {
-	Id          int64
-	Username    string
-	FirstName   string
-	LastName    string
-	MiddleName  string
-	Grade       int64
-	Gender      string
-	Passkey     string
-	PasskeySalt string
-	StudentId   int64
-	Email       string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	Id              int64
+	Username        string
+	FirstName       string
+	LastName        string
+	MiddleName      string
+	Grade           int64
+	Gender          string
+	Passkey         string
+	PasskeySalt     string
+	StudentId       int64
+	Email           string
+	StartingBalance float64
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 func (user *User) FindById() error {

@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `passkey_salt` varchar(255) DEFAULT "",
   `student_id` BIGINT(16) DEFAULT -1,
   `email` varchar(255) NOT NULL UNIQUE,
+  `starting_balance` double NOT NULL,
   `created_at` datetime,
   `updated_at` datetime,
   PRIMARY KEY (`id`)

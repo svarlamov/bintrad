@@ -24,6 +24,10 @@ func CreateRouter() http.Handler {
 	apiV0Router = apiV0Router.StrictSlash(true)
 	apiV0Router.HandleFunc("/", Use(api.V0_API)).Methods("GET")
 	apiV0Router.HandleFunc("/authenticate", Use(api.V0_API_Authenticate)).Methods("POST")
+	apiV0Router.HandleFunc("/contracts/sessions", Use(api.V0_API_Start_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
+	apiV0Router.HandleFunc("/contracts/sessions/{sessionId}", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
+	apiV0Router.HandleFunc("/users/me", Use(api.V0_API_Get_My_User_Data, RequireValidTokenForAPI)).Methods("POST")
+	apiV0Router.HandleFunc("/leaderboard", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
 	//apiV0Router.HandleFunc("/traces", Use(api.V0_API_Init_Trace_Pixel, RequireValidTokenForAPI)).Methods("POST")
 
 	// Ensure that the API V0 subrouter gets called

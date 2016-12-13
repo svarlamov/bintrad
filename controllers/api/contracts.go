@@ -54,7 +54,7 @@ func V0_API_Start_Contract_Session(w http.ResponseWriter, r *http.Request) {
 
 func V0_API_Finalise_Contract_Session(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	contractSessionIdStr := vars["contractSessionId"]
+	contractSessionIdStr := vars["sessionId"]
 	contractSessionId, err := strconv.Atoi(contractSessionIdStr)
 	if err != nil {
 		utils.JSONBadRequestError(w, "Unknown contractSessionId", "")
@@ -94,6 +94,20 @@ func V0_API_Finalise_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		utils.JSONInternalError(w, "Error generating contract", "")
 		return
 	}
+	completeUser := models.CompleteUser{}
+	err = completeUser.PopulateFromUser(user)
+	if err != nil {
+		utils.JSONInternalError(w, "Error getting user data", "")
+		return
+	}
+	respObj := models.FinaliseContractSessionResponse{
+		UserData:  completeUser,
+		Bet:       contract.Bet,
+		Price:     contract.Price,
+		IsBullish: contract.IsBullish,
+		IsCorrect: contract.IsCorrect,
+		Return:    contract.Return,
+	}
 	// TODO: Send back contract data and user data
-	utils.JSONSuccess(w, "Finalised contract position", "")
+	utils.JSONSuccess(w, respObj, "Successfully closed contract")
 }
