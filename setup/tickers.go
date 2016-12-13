@@ -28,6 +28,7 @@ func setupTickers() error {
 			TickerId: foo.Id,
 			OpensAt:  startTime.Add(time.Duration(ind) * time.Duration(periodSeconds) * time.Second),
 			ClosesAt: startTime.Add(time.Duration(ind+1) * time.Duration(periodSeconds) * time.Second),
+			Period:   300,
 			Open:     open[ind],
 			High:     high[ind],
 			Low:      low[ind],

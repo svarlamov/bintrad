@@ -43,19 +43,16 @@
             <div id="navbar" class="navbar-collapse collapse">
                 <ul class="nav navbar-nav navbar-left">
                     <li class="dropdown">
-                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Balance: $<span id="my-balance">{{.CurrentBalance}}</span></h4>
+                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Balance: $<span id="my-balance"></span></h4>
                     </li>
                     <li class="dropdown">
-                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Avg. P/L: <span id="my-avg-pnl">{{.AveragePnL}}</span>%</h4>
+                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Avg. P/L: <span id="my-avg-pnl"></span>%</h4>
                     </li>
                     <li class="dropdown">
-                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Total P/L: <span id="my-total-pnl">{{.TotalPnL}}</span>%</h4>
+                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Total P/L: <span id="my-total-pnl"></span>%</h4>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="btn" style="padding: 20px 25px 0px 15px;height: 25px;">How to Play?</a>
-                    </li>
                     <li class="dropdown">
                         <h4 style="padding: 0px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">{{.FirstName}} {{.LastName}}<br><small><a href="/logout" style="padding:0px;">Logout</a></small></h4>
                     </li>
@@ -92,7 +89,18 @@
 
     <!-- Main content-->
     <section class="content" style="padding: 0px;">
-        <div id="trading-view">
+        <div id="idle-view">
+            <div class="text-center">
+                <div class="col col-md-2 text-center"></div>
+                <div class="col col-md-8 text-center" style="padding-top: 100px;">
+                    <h2>What's BinTrad?</h2>
+                    <div style="font-size: 15px;">When you click the "Start New Trade!" button below, you will see the trading view, and the countdown timer (2 minutes per trade) will begin. You will receive an unknown stock or currency, and then you will have the opportunity to place an all or nothing bet on that stock or currency's price 30 minutes into the future. Since this is based on historical data, you'll win/lose instantly, so there's zero waiting! If you're right, you'll get 200% back. If you're wrong, you'll lose 100% of your money. If you run out of money, that's it, but if you don't end up broke, you can play on and on. Ready to go?</div>
+                    <btn class="btn btn-w-md btn-primary btn-block" onclick="startNewTrade();" style="margin-top: 25px;">Start New Trade!</btn>
+                </div>
+                <div class="col col-md-2 text-center"></div>
+            </div>
+        </div>
+        <div id="trading-view" style="display: none;">
             <div id="trading-chart"></div>
             <div id="trading-order-view">
                 <div>
@@ -115,8 +123,8 @@
                     </div>
                     <div class="col col-md-3 text-center">
                         <h2>Place 30 Minute Prediction</h2>
-                        <btn class="btn btn-w-md btn-success btn-block">UP / HIGHER / BULLISH</btn>
-                        <btn href="#" class="btn btn-w-md btn-danger btn-block">DOWN / LOWER / BEARISH</btn>
+                        <btn onclick="placeTrade(true);" class="btn btn-w-md btn-success btn-block">UP / HIGHER / BULLISH</btn>
+                        <btn onclick="placeTrade(false);" href="#" class="btn btn-w-md btn-danger btn-block">DOWN / LOWER / BEARISH</btn>
                     </div>
                 </div>
             </div>
@@ -139,18 +147,83 @@
 <script src="http://techanjs.org/techan.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
-<script src="/static/vendor/techan/site.js"></script>
+<script src="/static/vendor/techan/trading_charts.js"></script>
 
 <!-- App scripts -->
 <script src="/static/js/bwh.js"></script>
 
 <script>
-    (function(window, d3, techanSite) {
-        d3.select('div#trading-chart').call(techanSite.bigchart);
+    var currentContractSession = {};
+    function startNewTrade() {
+        $.ajax({
+            type: "POST",
+            url: '/api/v0/contracts/sessions',
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8"
+        }).done(function(data) {
+            currentContractSession = data.data;
+            showTradingView(currentContractSession);
+        }).fail(function(data) {
+            showErrorToast(data.responseJSON.message, data.responseJSON.debug);
+        });
+        return false
+    }
+
+    function showTradingView(contract) {
+        $('#trading-view').show();
+        $('#idle-view').hide();
+        var chart = tradingChart(getStockFromContractData(contract));
+        d3.select('div#trading-chart').call(chart);
         window.onresize = function() {
-            d3.select('div#trading-chart').call(techanSite.bigchart.resize);
+            d3.select('div#trading-chart').call(chart.resize);
         };
-    })(window, d3, techanSite);
+    }
+
+    function showIdleView() {
+        d3.select('div#trading-chart').selectAll('svg').remove();
+        $('#trading-view').hide();
+        $('#idle-view').show();
+    }
+
+    function updateCurrentUserData(user) {
+        $('#my-balance').text(parseFloat(user.currentBalance).toFixed(2));
+        $('#my-avg-pnl').text(parseFloat(user.averagePnL).toFixed(3));
+        $('#my-total-pnl').text(parseFloat(user.totalPnL).toFixed(3));
+    }
+
+    updateCurrentUserData({currentBalance: {{.CurrentBalance}}, averagePnL: {{.AveragePnL}}, totalPnL: {{.TotalPnL}}});
+
+    function placeTrade(isBullish) {
+        var bet = $('#trading-order-bet-size').val();
+        if (isNaN(parseFloat(bet))) {
+            showErrorToast("You must enter a valid non-zero bet to continue");
+            return;
+        }
+        var formData = {
+            'isBullish': isBullish,
+            'bet' : parseFloat(bet)
+        };
+        $.ajax({
+            type: "POST",
+            url: '/api/v0/contracts/sessions/' + currentContractSession.id,
+            data: JSON.stringify(formData),
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8"
+        }).done(function(data) {
+            currentContractSession = {};
+            showIdleView();
+            updateCurrentUserData(data.data.userData);
+            if (data.data.isCorrect) {
+                toastr.success('You earned $' + data.data.return + ' on the last trade! Start a new trade to do even better!');
+            } else {
+                toastr.error('You lost $' + data.data.bet + ' on the last trade. Start a new trade to earn it back!');
+            }
+        }).fail(function(data) {
+            showErrorToast(data.responseJSON.message, data.responseJSON.debug);
+        });
+        return false
+    }
+
 </script>
 
 </body>

@@ -23,7 +23,7 @@ func (session *ContractSession) Create() error {
 }
 
 func (session *ContractSession) GetByIdAndUserId() error {
-	return db.Where("id = ? AND user_id = ?", session.Id, session.UserId).Error
+	return db.Where("id = ? AND user_id = ?", session.Id, session.UserId).First(&session).Error
 }
 
 func (session *ContractSession) GenerateContractData(bet float64, isBullish bool, finalTickId int64) (Contract, error) {
@@ -55,6 +55,5 @@ func (session *ContractSession) GenerateContractData(bet float64, isBullish bool
 		contract.IsCorrect = false
 		contract.Return = 0
 	}
-	err = contract.Create()
-	return contract, err
+	return contract, nil
 }

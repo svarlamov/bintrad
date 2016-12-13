@@ -42,6 +42,7 @@ func V0_API_Start_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		Price:       tickerData[len(tickerData)-1].Close,
 		Ttl:         130,
 		IsClosed:    false,
+		ClosedAt:    time.Now().AddDate(-1, 0, 0),
 		DataStart:   tickerData[0].OpensAt,
 		DataEnd:     tickerData[len(tickerData)-1].OpensAt,
 		FinalTickId: finalTickId,
@@ -95,6 +96,8 @@ func V0_API_Finalise_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		utils.JSONDetailed(w, utils.APIResponse{Message: "Contract session has expired"}, 422)
 		return
 	}
+
+	// TODO: Don't allow closing a contract multiple times
 
 	completeUser := models.CompleteUser{}
 	err = completeUser.PopulateFromUser(user)

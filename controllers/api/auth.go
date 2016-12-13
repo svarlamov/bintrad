@@ -30,3 +30,8 @@ func V0_API_Authenticate(w http.ResponseWriter, r *http.Request) {
 	respObj := models.AuthResponse{AccessToken: accessToken.Token}
 	utils.JSONSuccess(w, respObj, "Successfully authenticated")
 }
+
+func V0_API_Logout(w http.ResponseWriter, r *http.Request) {
+	utils.SetHTTPOnlyCookie(w, config.Conf.TokenCookieName, "")
+	utils.TemporaryRedirect(w, r, "/")
+}

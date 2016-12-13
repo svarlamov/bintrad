@@ -16,7 +16,8 @@ func CreateRouter() http.Handler {
 	router = router.StrictSlash(true)
 
 	router.HandleFunc("/", Use(views.V0_VIEWS_Index)).Methods("GET")
-	router.HandleFunc("/tradingDesk", Use(views.V0_VIEWS_Trading_Desk, RequireValidTokenForView)).Methods("GET")
+	router.HandleFunc("/tradingDesk", Use(views.V0_VIEWS_Trading_Desk, RequireValidTokenForView, GetContext)).Methods("GET")
+	router.HandleFunc("/logout", Use(api.V0_API_Logout, RequireValidTokenForView, GetContext)).Methods("GET")
 
 	// API V0 Routes
 	// TODO: Add in leaderboard endpoint
@@ -26,7 +27,7 @@ func CreateRouter() http.Handler {
 	apiV0Router.HandleFunc("/authenticate", Use(api.V0_API_Authenticate, GetContext)).Methods("POST")
 	apiV0Router.HandleFunc("/contracts/sessions", Use(api.V0_API_Start_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
 	apiV0Router.HandleFunc("/contracts/sessions/{sessionId}", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
-	apiV0Router.HandleFunc("/users/me", Use(api.V0_API_Get_My_User_Data, RequireValidTokenForAPI, GetContext)).Methods("POST")
+	apiV0Router.HandleFunc("/users/me", Use(api.V0_API_Get_My_User_Data, RequireValidTokenForAPI, GetContext)).Methods("GET")
 	//apiV0Router.HandleFunc("/leaderboard", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
 
 	// Ensure that the API V0 subrouter gets called

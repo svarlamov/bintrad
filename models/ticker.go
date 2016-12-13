@@ -38,9 +38,10 @@ func (ticker *Ticker) GetRandomTickerAndDataSubset(contractPeriod int) ([]Ticker
 	// randomPeriods >= contractPeriod+1 && randomPeriods < periodsBuffer
 	randomStartTime := firstTick.OpensAt
 	randomPeriods := 3
-	err = db.Where("ticker_id = ? AND opens_at > ?", ticker.Id, randomStartTime).Order("opens_at ASC").Limit(randomPeriods).Scan(&ticks).Error
+	err = db.Where("ticker_id = ? AND opens_at > ?", ticker.Id, randomStartTime).Order("opens_at ASC").Limit(randomPeriods).Find(&ticks).Error
 	if err != nil {
 		return ticks, finalTickId, err
 	}
+	finalTickId = ticks[len(ticks)-1].Id
 	return ticks[:len(ticks)-contractPeriod], finalTickId, nil
 }
