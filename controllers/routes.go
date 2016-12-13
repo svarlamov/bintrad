@@ -5,6 +5,7 @@ import (
 	"github.com/justinas/nosurf"
 	"github.com/svarlamov/bintrad/config"
 	"github.com/svarlamov/bintrad/controllers/api"
+	"github.com/svarlamov/bintrad/controllers/views"
 	"net/http"
 )
 
@@ -14,26 +15,26 @@ func CreateRouter() http.Handler {
 	router := mux.NewRouter()
 	router = router.StrictSlash(true)
 
-	// TODO: View routes
-	//router.HandleFunc("/r/{authPathToken}", Use(api.V0_API_Activate_Registration_Link)).Methods("GET")
+	router.HandleFunc("/", Use(views.V0_VIEWS_Index)).Methods("GET")
 	//router.HandleFunc("/l/{sentFromEmailEncoded}/{tracePathToken}", Use(api.V0_API_Trace_Request)).Methods("GET")
 
 	// API V0 Routes
 	// TODO: Add in contracts routes, create a new 'my user data' route, and (as time allows) a leaderboard endpoint
 	apiV0Router := router.PathPrefix("/api/v0").Subrouter()
 	apiV0Router = apiV0Router.StrictSlash(true)
-	apiV0Router.HandleFunc("/", Use(api.V0_API)).Methods("GET")
-	apiV0Router.HandleFunc("/authenticate", Use(api.V0_API_Authenticate)).Methods("POST")
-	apiV0Router.HandleFunc("/contracts/sessions", Use(api.V0_API_Start_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
-	apiV0Router.HandleFunc("/contracts/sessions/{sessionId}", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
-	apiV0Router.HandleFunc("/users/me", Use(api.V0_API_Get_My_User_Data, RequireValidTokenForAPI)).Methods("POST")
-	apiV0Router.HandleFunc("/leaderboard", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
+	apiV0Router.HandleFunc("/", Use(api.V0_API, GetContext)).Methods("GET")
+	apiV0Router.HandleFunc("/authenticate", Use(api.V0_API_Authenticate, GetContext)).Methods("POST")
+	apiV0Router.HandleFunc("/contracts/sessions", Use(api.V0_API_Start_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
+	apiV0Router.HandleFunc("/contracts/sessions/{sessionId}", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
+	apiV0Router.HandleFunc("/users/me", Use(api.V0_API_Get_My_User_Data, RequireValidTokenForAPI, GetContext)).Methods("POST")
+	//apiV0Router.HandleFunc("/leaderboard", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI)).Methods("POST")
 	//apiV0Router.HandleFunc("/traces", Use(api.V0_API_Init_Trace_Pixel, RequireValidTokenForAPI)).Methods("POST")
 
 	// Ensure that the API V0 subrouter gets called
 	router.PathPrefix("/api/v0/").Handler(apiV0Router)
 
-	// TODO: Static file routes
+	staticFS := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
+	router.PathPrefix("/static/").Handler(staticFS).Methods("GET")
 
 	// Setup CSRF Protection
 	csrfHandler := nosurf.New(router)

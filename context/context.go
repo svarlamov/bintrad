@@ -55,6 +55,21 @@ func GetUserAndCatch(w http.ResponseWriter, r *http.Request) (models.User, error
 	return user, nil
 }
 
+func GetUserSilently(r *http.Request) (models.User, error) {
+	var user models.User
+	tkn := models.AccessToken{}
+	tkn, err := GetToken(r)
+	if err != nil || tkn.Id == 0 {
+		return user, err
+	}
+	user = models.User{Id: tkn.UserId}
+	err = user.FindById()
+	if err != nil || user.Id == 0 {
+		return user, err
+	}
+	return user, nil
+}
+
 func jsonWriter(w http.ResponseWriter, d interface{}, c int) {
 	//dj, err := json.MarshalIndent(d, "", "  ")
 	dj, err := json.Marshal(d)

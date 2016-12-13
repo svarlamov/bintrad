@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/svarlamov/bintrad/config"
+	"html/template"
 	"net/http"
 	"reflect"
 )
@@ -142,4 +143,11 @@ func SetHTTPOnlyCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 		Path:     "/",
 		HttpOnly: true,
 	})
+}
+
+func RenderSuccessfulTemplateFromFile(w http.ResponseWriter, filePath string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(200)
+	loginTempl := template.Must(template.ParseFiles(filePath))
+	loginTempl.Execute(w, nil)
 }
