@@ -20,7 +20,6 @@ func CreateRouter() http.Handler {
 	router.HandleFunc("/logout", Use(api.V0_API_Logout, RequireValidTokenForView, GetContext)).Methods("GET")
 
 	// API V0 Routes
-	// TODO: Add in leaderboard endpoint
 	apiV0Router := router.PathPrefix("/api/v0").Subrouter()
 	apiV0Router = apiV0Router.StrictSlash(true)
 	apiV0Router.HandleFunc("/", Use(api.V0_API, GetContext)).Methods("GET")
@@ -28,7 +27,7 @@ func CreateRouter() http.Handler {
 	apiV0Router.HandleFunc("/contracts/sessions", Use(api.V0_API_Start_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
 	apiV0Router.HandleFunc("/contracts/sessions/{sessionId}", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
 	apiV0Router.HandleFunc("/users/me", Use(api.V0_API_Get_My_User_Data, RequireValidTokenForAPI, GetContext)).Methods("GET")
-	//apiV0Router.HandleFunc("/leaderboard", Use(api.V0_API_Finalise_Contract_Session, RequireValidTokenForAPI, GetContext)).Methods("POST")
+	apiV0Router.HandleFunc("/leaderboard", Use(api.V0_API_Get_Leaderboard, RequireValidTokenForAPI, GetContext)).Methods("GET")
 
 	// Ensure that the API V0 subrouter gets called
 	router.PathPrefix("/api/v0/").Handler(apiV0Router)

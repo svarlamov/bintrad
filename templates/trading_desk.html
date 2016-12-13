@@ -70,8 +70,8 @@
                     <h4>Live Top 10 Earners</h4>
                 </li>
                 <li class="nav-category" style="padding: 0px;">
-                    <ol>
-                        <li>Sasha Varlamov - $1,000,001</li>
+                    <ol id="leaderboard">
+
                     </ol>
                 </li>
 
@@ -223,6 +223,27 @@
         });
         return false
     }
+
+    function updateLeaderboard() {
+        $.ajax({
+            type: "GET",
+            url: '/api/v0/leaderboard',
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8"
+        }).done(function(data) {
+            var tmpBody = ''
+            for (var i = 0; i < data.data.length; i++) {
+                tmpBody += '<li>' + data.data[i].firstName + ' ' + data.data[i].lastName + '<br>$' + data.data[i].currentBalance + '</li><br>';
+            }
+            $('#leaderboard').html(tmpBody);
+        }).fail(function(data) {
+            console.log("Error getting leaderboard");
+        });
+        return false
+    }
+
+    updateLeaderboard();
+    setInterval(updateLeaderboard, 10000);
 
 </script>
 
