@@ -38,6 +38,9 @@ func (completeUser *CompleteUser) PopulateFromUser(user User) error {
 	}
 	completeUser.CurrentBalance = currentBalance
 	completeUser.TotalPnL = ((currentBalance / completeUser.StartingBalance) - 1) * 100.0
-	completeUser.AveragePnL = pnlSum / float64(len(contracts))
+	if len(contracts) > 0 {
+		completeUser.AveragePnL = pnlSum / float64(len(contracts))
+	}
+
 	return nil
 }

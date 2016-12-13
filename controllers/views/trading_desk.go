@@ -21,6 +21,6 @@ func V0_VIEWS_Trading_Desk(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.RenderSuccessfulTemplateFromFile(w, "templates/trading_desk.html")
+	utils.RenderSuccessfulTemplateFromFile(w, completeUser, "templates/trading_desk.html")
 
 }

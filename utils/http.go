@@ -145,11 +145,11 @@ func SetHTTPOnlyCookie(w http.ResponseWriter, cookieName, cookieValue string) {
 	})
 }
 
-func RenderSuccessfulTemplateFromFile(w http.ResponseWriter, filePath string) {
+func RenderSuccessfulTemplateFromFile(w http.ResponseWriter, data interface{}, filePath string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(200)
 	loginTempl := template.Must(template.ParseFiles(filePath))
-	loginTempl.Execute(w, nil)
+	loginTempl.Execute(w, data)
 }
 
 func TemporaryRedirect(w http.ResponseWriter, r *http.Request, url string) {
