@@ -1,17 +1,17 @@
 package setup
 
 import (
-	"github.com/svarlamov/bintrad/models"
-	"time"
-	"net/http"
 	"encoding/json"
+	"github.com/svarlamov/bintrad/models"
+	"net/http"
+	"time"
 )
 
 func setupTickers() error {
-	tickers := []string{"JBLU"}
+	tickers := []string{"JBLU", "CACC", "GSS"}
 	for _, key := range tickers {
 		resp := models.YahooFinanceResponse{}
-		err := getJson("https://query1.finance.yahoo.com/v7/finance/chart/" + key + "?range=1y&interval=30m&indicators=quote&includeTimestamps=true&includePrePost=false&corsDomain=finance.yahoo.com", &resp)
+		err := getJson("https://query1.finance.yahoo.com/v7/finance/chart/"+key+"?range=1y&interval=30m&indicators=quote&includeTimestamps=true&includePrePost=false&corsDomain=finance.yahoo.com", &resp)
 		if err != nil {
 			return err
 		}

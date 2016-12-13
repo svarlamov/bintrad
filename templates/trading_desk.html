@@ -46,10 +46,10 @@
                         <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Balance: $<span id="my-balance"></span></h4>
                     </li>
                     <li class="dropdown">
-                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Avg. P/L: <span id="my-avg-pnl"></span>%</h4>
+                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Avg. P/L: <span class="my-avg-pnl" id="my-avg-pnl"></span><span class="my-avg-pnl">%</span></h4>
                     </li>
                     <li class="dropdown">
-                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Total P/L: <span id="my-total-pnl"></span>%</h4>
+                        <h4 style="padding: 13px 25px 0px 15px;color: #6a727a; text-transform: none;" class="profile-address">Total P/L: <span class="my-total-pnl" id="my-total-pnl"></span><span class="my-total-pnl">%</span></h4>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
@@ -95,7 +95,8 @@
                 <div class="col col-md-8 text-center" style="padding-top: 100px;">
                     <h2>What's BinTrad?</h2>
                     <div style="font-size: 15px;">When you click the "Start New Trade!" button below, you will see the trading view, and the countdown timer (2 minutes per trade) will begin. You will receive an unknown stock or currency, and then you will have the opportunity to place an all or nothing bet on that stock or currency's price 30 minutes into the future. Since this is based on historical data, you'll win/lose instantly, so there's zero waiting! If you're right, you'll get 200% back. If you're wrong, you'll lose 100% of your money. If you run out of money, that's it, but if you don't end up broke, you can play on and on. Ready to go?</div>
-                    <btn class="btn btn-w-md btn-primary btn-block" onclick="startNewTrade();" style="margin-top: 25px;">Start New Trade!</btn>
+                    <btn id="idle-view-start-btn" class="btn btn-w-md btn-primary btn-block" onclick="startNewTrade();" style="margin-top: 25px;">Start New Trade!</btn>
+                    <h3 id="idle-view-no-money" style="display: none;">You've run out of money, so you're no longer able to trade.<br>Thank you for playing!</h3>
                 </div>
                 <div class="col col-md-2 text-center"></div>
             </div>
@@ -110,13 +111,13 @@
                     </div>
                     <div class="col col-md-2 text-center">
                         <h2>Time Left</h2>
-                        <div id="trading-order-view-countdown" style="font-size: 48px;">00:32</div>
+                        <div id="trading-order-view-countdown" style="font-size: 48px;"></div>
                     </div>
                     <div class="col col-md-3 text-center">
                         <div>
                             <div class="form-group">
                                 <h2>Bet Size (Dollars)</h2>
-                                <input type="text" placeholder="100.0" title="Please enter your bet size in dollars" required id="trading-order-bet-size" class="form-control">
+                                <input type="text" placeholder="Enter your bet here (numbers only)" title="Please enter your bet size in dollars" required id="trading-order-bet-size" class="form-control">
                                 <span class="help-block small">Your bet size is how much you wish to bet on this trade. Binary options are all or nothing, and remember that this must be less than your current balance.</span>
                             </div>
                         </div>
@@ -124,7 +125,8 @@
                     <div class="col col-md-3 text-center">
                         <h2>Place 30 Minute Prediction</h2>
                         <btn onclick="placeTrade(true);" class="btn btn-w-md btn-success btn-block">UP / HIGHER / BULLISH</btn>
-                        <btn onclick="placeTrade(false);" href="#" class="btn btn-w-md btn-danger btn-block">DOWN / LOWER / BEARISH</btn>
+                        <btn onclick="placeTrade(false);" style="margin-top: 10px;" class="btn btn-w-md btn-danger btn-block">DOWN / LOWER / BEARISH</btn>
+                        <btn onclick="showIdleView();" style="margin-top: 10px;" class="btn btn-w-md btn-warning btn-block">Cancel</btn>
                     </div>
                 </div>
             </div>
@@ -154,6 +156,7 @@
 
 <script>
     var currentContractSession = {};
+    var timerId;
     function startNewTrade() {
         $.ajax({
             type: "POST",
@@ -169,6 +172,26 @@
         return false
     }
 
+    function startTimer(duration, display) {
+        var timer = duration, minutes, seconds;
+        timerId = setInterval(function () {
+            minutes = parseInt(timer / 60, 10);
+            seconds = parseInt(timer % 60, 10);
+
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+
+            display.text(minutes + ":" + seconds);
+
+            if (--timer < 0) {
+                window.clearInterval(timerId);
+                showIdleView();
+                toastr.warning("You ran out of time on the last trade, however you didn't lose any money. Start a new trade to make some money!");
+                timerId = null;
+            }
+        }, 1000);
+    }
+
     function showTradingView(contract) {
         $('#trading-view').show();
         $('#idle-view').hide();
@@ -177,18 +200,40 @@
         window.onresize = function() {
             d3.select('div#trading-chart').call(chart.resize);
         };
+        startTimer(contract.ttl, $('#trading-order-view-countdown'));
     }
 
     function showIdleView() {
         d3.select('div#trading-chart').selectAll('svg').remove();
+        window.clearInterval(timerId);
         $('#trading-view').hide();
         $('#idle-view').show();
     }
 
     function updateCurrentUserData(user) {
         $('#my-balance').text(parseFloat(user.currentBalance).toFixed(2));
+        if (parseFloat(user.currentBalance).toFixed(2) > 0) {
+            $('.my-balance').css('color', '#00AA00');
+        } else {
+            $('.my-balance').css('color', '#FF0000');
+            $('#idle-view-start-btn').attr('onclick', false);
+            $('#idle-view-start-btn').attr('disabled', true);
+            $('#idle-view-no-money').show();
+        }
+
         $('#my-avg-pnl').text(parseFloat(user.averagePnL).toFixed(3));
+        if (parseFloat(user.averagePnL).toFixed(3) >= 0) {
+            $('.my-avg-pnl').css('color', '#00AA00');
+        } else {
+            $('.my-avg-pnl').css('color', '#FF0000');
+        }
+
         $('#my-total-pnl').text(parseFloat(user.totalPnL).toFixed(3));
+        if (parseFloat(user.totalPnL).toFixed(3) >= 0) {
+            $('.my-total-pnl').css('color', '#00AA00');
+        } else {
+            $('.my-total-pnl').css('color', '#FF0000');
+        }
     }
 
     updateCurrentUserData({currentBalance: {{.CurrentBalance}}, averagePnL: {{.AveragePnL}}, totalPnL: {{.TotalPnL}}});

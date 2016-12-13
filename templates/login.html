@@ -39,21 +39,21 @@
             </div>
             <div class="panel panel-filled">
                 <div class="panel-body">
-                    <div id="login-form">
+                    <form id="login-form" onsubmit="submitLogin();">
                         <div class="form-group">
                             <label class="control-label" for="username-field">Student Id/Email</label>
-                            <input type="text" placeholder="170034@hkis.edu.hk" title="Please enter your student ID or email" required name="username" id="username-field" class="form-control">
+                            <input type="text" placeholder="181001" title="Please enter your student ID or email" name="username" id="username-field" class="form-control">
                             <span class="help-block small">Your unique username to access BinTrad</span>
                         </div>
                         <div class="form-group">
-                            <label class="control-label" for="passkey-field">Password</label>
-                            <input type="password" title="Please enter your password" placeholder="******" required name="password" id="passkey-field" class="form-control">
+                            <label class="control-label" for="passkey-field">Password/Passkey</label>
+                            <input type="password" title="Please enter your password" placeholder="" name="password" id="passkey-field" class="form-control">
                             <span class="help-block small">Your passkey provided in the email</span>
                         </div>
                         <div>
                             <button class="btn btn-accent" onclick="submitLogin();">Login</button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 

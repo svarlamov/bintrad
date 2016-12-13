@@ -26,6 +26,10 @@ func (session *ContractSession) GetByIdAndUserId() error {
 	return db.Where("id = ? AND user_id = ?", session.Id, session.UserId).First(&session).Error
 }
 
+func (session *ContractSession) CloseByIdAndUserId() error {
+	return db.Model(&ContractSession{}).Where("id = ? AND user_id = ?", session.Id, session.UserId).Updates(map[string]interface{}{"is_closed": true, "closed_at": time.Now()}).Error
+}
+
 func (session *ContractSession) GenerateContractData(bet float64, isBullish bool, finalTickId int64) (Contract, error) {
 	finalTick := TickerData{
 		Id: finalTickId,

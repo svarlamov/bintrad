@@ -28,9 +28,9 @@ func V0_API_Start_Contract_Session(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contractPeriod := 1
+	contractTickCnt := 1
 	ticker := models.Ticker{}
-	tickerData, finalTickId, err := ticker.GetRandomTickerAndDataSubset(contractPeriod)
+	tickerData, finalTickId, err := ticker.GetRandomTickerAndDataSubset(contractTickCnt)
 	if err != nil {
 		utils.JSONInternalError(w, "Error creating a new contract session", "")
 		return
@@ -38,9 +38,9 @@ func V0_API_Start_Contract_Session(w http.ResponseWriter, r *http.Request) {
 	contractSession := models.ContractSession{
 		UserId:      user.Id,
 		TickerId:    ticker.Id,
-		Period:      int64(contractPeriod),
+		Period:      int64(contractTickCnt),
 		Price:       tickerData[len(tickerData)-1].Close,
-		Ttl:         130,
+		Ttl:         75,
 		IsClosed:    false,
 		ClosedAt:    time.Now().AddDate(-1, 0, 0),
 		DataStart:   tickerData[0].OpensAt,
@@ -90,6 +90,10 @@ func V0_API_Finalise_Contract_Session(w http.ResponseWriter, r *http.Request) {
 	err = contractSession.GetByIdAndUserId()
 	if err != nil {
 		utils.JSONNotFoundError(w, "Couldn't find contract session", "")
+		return
+	}
+	if contractSession.IsClosed == true {
+		utils.JSONDetailed(w, utils.APIResponse{Message: "Contract session has already been closed"}, 422)
 		return
 	}
 	if contractSession.CreatedAt.Add(time.Duration(contractSession.Ttl) * time.Second).Before(time.Now()) {

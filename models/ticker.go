@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"github.com/svarlamov/bintrad/utils"
+	"time"
+)
 
 type Ticker struct {
 	Id        int64
@@ -15,15 +18,14 @@ func (ticker *Ticker) Create() error {
 	return db.Create(&ticker).Error
 }
 
-func (ticker *Ticker) GetRandomTickerAndDataSubset(contractPeriod int) ([]TickerData, int64, error) {
+func (ticker *Ticker) GetRandomTickerAndDataSubset(contractTickCnt int) ([]TickerData, int64, error) {
 	var ticks []TickerData
 	var finalTickId int64
-	// TODO: Generate random ID
-	randomId := 1
-	err := db.Where("id = ?", randomId).First(&ticker).Error
+	err := db.Model(Ticker{}).Order("RAND()").Limit(1).Scan(ticker).Error
 	if err != nil {
 		return ticks, finalTickId, err
 	}
+	var tickCnt int64
 	var firstTick, lastTick TickerData
 	err = db.Where("ticker_id = ?", ticker.Id).Order("opens_at ASC").First(&firstTick).Error
 	if err != nil {
@@ -33,15 +35,16 @@ func (ticker *Ticker) GetRandomTickerAndDataSubset(contractPeriod int) ([]Ticker
 	if err != nil {
 		return ticks, finalTickId, err
 	}
-	// TODO: Generate random start time and periods count
-	// randomStartTime < minBufferToTickerDataEnd
-	// randomPeriods >= contractPeriod+1 && randomPeriods < periodsBuffer
-	randomStartTime := firstTick.OpensAt
-	randomPeriods := 3
-	err = db.Where("ticker_id = ? AND opens_at > ?", ticker.Id, randomStartTime).Order("opens_at ASC").Limit(randomPeriods).Find(&ticks).Error
+	err = db.Model(TickerData{}).Where("ticker_id = ?", ticker.Id).Count(&tickCnt).Error
+	if err != nil {
+		return ticks, finalTickId, err
+	}
+	var periodsBuffer int64 = 31
+	offset := utils.GenerateRandomIntegerWithinRange(periodsBuffer, tickCnt-periodsBuffer)
+	err = db.Where("ticker_id = ?", ticker.Id).Order("opens_at ASC").Offset(int(offset)).Limit(int(periodsBuffer)).Find(&ticks).Error
 	if err != nil {
 		return ticks, finalTickId, err
 	}
 	finalTickId = ticks[len(ticks)-1].Id
-	return ticks[:len(ticks)-contractPeriod], finalTickId, nil
+	return ticks[:len(ticks)-contractTickCnt], finalTickId, nil
 }
