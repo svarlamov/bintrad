@@ -8,7 +8,7 @@ import (
 )
 
 func setupTickers() error {
-	tickers := []string{"JBLU", "CACC", "GSS"}
+	tickers := []string{"IBM", "XOM", "CVX", "JBLU", "CACC", "PG", "MCD", "GE", "JPM", "CAT", "C", "AXP", "MSFT", "FB", "GOOG"}
 	for _, key := range tickers {
 		resp := models.YahooFinanceResponse{}
 		err := getJson("https://query1.finance.yahoo.com/v7/finance/chart/"+key+"?range=1y&interval=30m&indicators=quote&includeTimestamps=true&includePrePost=false&corsDomain=finance.yahoo.com", &resp)
