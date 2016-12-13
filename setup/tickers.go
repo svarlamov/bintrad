@@ -3,42 +3,56 @@ package setup
 import (
 	"github.com/svarlamov/bintrad/models"
 	"time"
+	"net/http"
+	"encoding/json"
 )
 
 func setupTickers() error {
-	foo := models.Ticker{
-		Id:     1,
-		Ticker: "FOO",
-		Name:   "Foo Inc.",
-		Type:   "EQUITY",
-	}
-	err := foo.Create()
-	if err != nil {
-		return err
-	}
-	open := []float64{90, 91.3, 88.7, 93.7, 83.2}
-	high := []float64{91.7, 91.5, 93.3, 93.9, 85.3}
-	low := []float64{87.6, 86.5, 88.5, 84.1, 82.8}
-	close := []float64{91.1, 87.3, 93.1, 84.3, 84.8}
-	volume := []float64{1001, 800, 2000, 200, 5000}
-	startTime := time.Now().AddDate(0, -1, 0)
-	periodSeconds := 300
-	for ind := range open {
-		tickerData := models.TickerData{
-			TickerId: foo.Id,
-			OpensAt:  startTime.Add(time.Duration(ind) * time.Duration(periodSeconds) * time.Second),
-			ClosesAt: startTime.Add(time.Duration(ind+1) * time.Duration(periodSeconds) * time.Second),
-			Period:   300,
-			Open:     open[ind],
-			High:     high[ind],
-			Low:      low[ind],
-			Close:    close[ind],
-			Volume:   volume[ind],
-		}
-		err = tickerData.Create()
+	tickers := []string{"JBLU"}
+	for _, key := range tickers {
+		resp := models.YahooFinanceResponse{}
+		err := getJson("https://query1.finance.yahoo.com/v7/finance/chart/" + key + "?range=1y&interval=30m&indicators=quote&includeTimestamps=true&includePrePost=false&corsDomain=finance.yahoo.com", &resp)
 		if err != nil {
 			return err
 		}
+		ticker := models.Ticker{
+			Ticker: resp.Chart.Result[0].Meta.Symbol,
+			Name:   resp.Chart.Result[0].Meta.Symbol,
+			Type:   resp.Chart.Result[0].Meta.InstrumentType,
+		}
+		err = ticker.Create()
+		if err != nil {
+			return err
+		}
+		startTime := time.Unix(resp.Chart.Result[0].Timestamp[0], 0)
+		periodSeconds := 1800
+		for ind := range resp.Chart.Result[0].Timestamp {
+			tickerData := models.TickerData{
+				TickerId: ticker.Id,
+				OpensAt:  startTime.Add(time.Duration(ind) * time.Duration(periodSeconds) * time.Second),
+				ClosesAt: startTime.Add(time.Duration(ind+1) * time.Duration(periodSeconds) * time.Second),
+				Period:   int64(periodSeconds),
+				Open:     resp.Chart.Result[0].Indicators.Quote[0].Open[ind],
+				High:     resp.Chart.Result[0].Indicators.Quote[0].High[ind],
+				Low:      resp.Chart.Result[0].Indicators.Quote[0].Low[ind],
+				Close:    resp.Chart.Result[0].Indicators.Quote[0].Close[ind],
+				Volume:   resp.Chart.Result[0].Indicators.Quote[0].Volume[ind],
+			}
+			err = tickerData.Create()
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
+}
+
+func getJson(url string, target interface{}) error {
+	r, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer r.Body.Close()
+
+	return json.NewDecoder(r.Body).Decode(target)
 }
