@@ -259,7 +259,7 @@
             showIdleView();
             updateCurrentUserData(data.data.userData);
             if (data.data.isCorrect) {
-                toastr.success('You earned $' + data.data.return + ' on the last trade! Start a new trade to do even better!');
+                toastr.success('You earned $' + (data.data.return-data.data.bet) + ' on the last trade! Start a new trade to do even better!');
             } else {
                 toastr.error('You lost $' + data.data.bet + ' on the last trade. Start a new trade to earn it back!');
             }
