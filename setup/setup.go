@@ -8,7 +8,7 @@ import (
 
 var Log = config.Conf.GetLogger()
 
-func StartSetup(resetDatabase bool) {
+func StartSetup(resetDatabase bool, justUsers bool) {
 	Log.Info("Server Loaded")
 
 	err := models.Setup()
@@ -29,7 +29,14 @@ func StartSetup(resetDatabase bool) {
 		Log.Info("Finished resetting database")
 	}
 
-	setupUsers()
-	setupTickers()
-
+	err = setupUsers()
+	if err != nil {
+		panic(err)
+	}
+	if !justUsers {
+		err = setupTickers()
+		if err != nil {
+			panic(err)
+		}
+	}
 }

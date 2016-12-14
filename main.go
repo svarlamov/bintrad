@@ -7,9 +7,10 @@ import (
 )
 
 var (
-	startCmd    = kingpin.Command("start", "Start the server").Default()
-	setupCmd    = kingpin.Command("setup", "Setup the data in the database")
-	resetDBFlag = setupCmd.Flag("resetdb", "Wipe database and reset tables first").Bool()
+	startCmd        = kingpin.Command("start", "Start the server").Default()
+	setupCmd        = kingpin.Command("setup", "Setup the data in the database")
+	resetDBFlag     = setupCmd.Flag("resetdb", "Wipe database and reset tables first").Bool()
+	justUsersDBFlag = setupCmd.Flag("usersonly", "Only add users when writing table data").Bool()
 )
 
 func main() {
@@ -19,6 +20,6 @@ func main() {
 	case "start":
 		startup.StartServer()
 	case "setup":
-		setup.StartSetup(*resetDBFlag)
+		setup.StartSetup(*resetDBFlag, *justUsersDBFlag)
 	}
 }
