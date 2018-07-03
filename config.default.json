@@ -13,5 +13,6 @@
     "port": "587"
   },
   "tokenCookieName": "sessId",
-  "mode": "debug"
+  "mode": "debug",
+  "foobar": "hello!"
 }
