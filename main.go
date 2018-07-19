@@ -23,5 +23,3 @@ func main() {
 		setup.StartSetup(*resetDBFlag, *justUsersDBFlag)
 	}
 }
-
-
